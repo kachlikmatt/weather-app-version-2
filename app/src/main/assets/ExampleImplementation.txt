@@ -1,0 +1,18 @@
+WeatherInfoIO.WeatherListener weatherDownloaded = new WeatherInfoIO.WeatherListener(){
+            @Override
+            public void handleResult(WeatherInfo result) {
+                PlaceholderFragment.this.info = result;
+                day = 0;
+                displayWeatherInfo();
+            }
+        };
+
+
+public void onClick(View v) {
+                    WeatherInfoIO.loadFromUrl("http://forecast.weather.gov/MapClick.php?lat="
+                            + latitude +
+                            "&lon="
+                            + longitude +
+                            "&unit=0&lg=english&FcstType=dwml",
+                            weatherDownloaded);
+                }
