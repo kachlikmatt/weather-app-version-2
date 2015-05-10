@@ -2,7 +2,6 @@ package edu.noctrl.kachlik.vic.weatherapp2;
 
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -19,23 +18,58 @@ public class Main extends ActionBarActivity {
 
     LocationIO locationHolder;
     String jsonUrl;
+    String latitude, longitude;
+    WeatherInfo weatherInfo;
+    WeatherInfoIO weatherIOHelper;
+    String weatherUrl;
+    WeatherInfoIO.WeatherListener weatherDownloaded;
 
     public void processJSON()
     {
         try
         {
-            Log.i("processJSON()", locationHolder.locationObject.toString(4));
-        }
-        catch(Exception e){}
+            latitude = locationHolder.locationObject.getString("latitude");
+            longitude = locationHolder.locationObject.getString("longitude");
+        } catch(Exception e){}
+
+        processWeatherInfo();
+    }
+
+    public void retrieveWeatherInfo()
+    {
+        weatherUrl = "http://forecast.weather.gov/MapClick.php?lat="
+                     + latitude
+                     + "&lon="
+                     + longitude
+                     + "&unit=0&lg=english&FcstType=dwml";
+
+        weatherDownloaded = new WeatherInfoIO.WeatherListener(){
+                                    @Override
+                                    public void handleResult(WeatherInfo result) {
+                                        weatherInfo = result;
+                                        processWeatherInfo();
+                                    }
+                                };
+
+        weatherIOHelper.loadFromUrl(weatherUrl, weatherDownloaded);
+    }
+
+    public void processWeatherInfo()
+    {
+        //this is where we handle the information retrieved from the XML parser
 
     }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
         locationHolder = new LocationIO();
+        latitude = "";
+        longitude = "";
         jsonUrl = "http://craiginsdev.com/zipcodes/findzip.php?zip=60540";
+        weatherIOHelper = new WeatherInfoIO();
     }
 
     @Override

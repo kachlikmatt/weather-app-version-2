@@ -23,6 +23,7 @@ public class WeatherInfoIO {
             }
         }
     }
+
     public static void loadFromUrl(String url, WeatherListener listener){
         try{
             Downloader<WeatherInfo> downloadInfo = new Downloader<>(listener);
