@@ -1,9 +1,14 @@
 package edu.noctrl.kachlik.vic.weatherapp2;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+
+import java.util.ArrayList;
 
 //url for JSON object: http://craiginsdev.com/zipcodes/findzip.php?zip=60540
 
@@ -23,6 +28,11 @@ public class Main extends ActionBarActivity {
     WeatherInfoIO weatherIOHelper;
     String weatherUrl;
     WeatherInfoIO.WeatherListener weatherDownloaded;
+    ArrayList<String> recentZipcodes;
+    final int MAX_LIST_SIZE = 5;
+    Boolean imperialPreferred;
+
+    String[] zipStringArray;
 
     public void processJSON()
     {
@@ -30,6 +40,41 @@ public class Main extends ActionBarActivity {
         {
             latitude = locationHolder.locationObject.getString("latitude");
             longitude = locationHolder.locationObject.getString("longitude");
+
+            //store zipcode for later sessions
+
+            /*
+            //manually build list for testing
+            recentZipcodes.clear();
+            recentZipcodes.add("60540");
+            recentZipcodes.add("60640");
+            recentZipcodes.add("90210");
+            recentZipcodes.add("50862");
+            recentZipcodes.add("70943");*/
+
+            if(zipStringArray != null)
+            {
+                String zipToAdd = locationHolder.locationObject.getString("zip").trim();
+                Boolean shouldAdd = true;
+
+                for(int i = 0; i < zipStringArray.length; i++)
+                {
+                    //zip code already exists within the list
+                    if(zipStringArray[i].trim().equals(zipToAdd))
+                    {
+                        shouldAdd = false;
+                        break;
+                    }
+                }
+
+                if(shouldAdd) {
+                    if(recentZipcodes.size() >= MAX_LIST_SIZE)
+                        recentZipcodes.remove(0);
+                    recentZipcodes.add(zipToAdd);
+                }
+            }
+            Log.i("processJSON", "recent zip codes: " + recentZipcodes.toString());
+
         } catch(Exception e){}
 
         processWeatherInfo();
@@ -70,12 +115,42 @@ public class Main extends ActionBarActivity {
         longitude = "";
         jsonUrl = "http://craiginsdev.com/zipcodes/findzip.php?zip=60540";
         weatherIOHelper = new WeatherInfoIO();
+        recentZipcodes = new ArrayList<>(MAX_LIST_SIZE);
+
+        // get stored zips and measurement preference from previous sessions
+        SharedPreferences sharedPref = getPreferences(Context.MODE_PRIVATE);
+        String zipString = sharedPref.getString("zipcodes","");
+        if(zipString.length() > 1)
+        {
+            zipString = zipString.substring(1, zipString.length()-1);
+            zipStringArray = zipString.split(",");
+            for(int i = 0; i < zipStringArray.length; i++)
+                recentZipcodes.add(zipStringArray[i].trim());
+        }
+
+        imperialPreferred = sharedPref.getBoolean("imperial", true);
     }
 
     @Override
     protected void onStart() {
         super.onStart();
         locationHolder.retrieveJson(jsonUrl, this);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+
+        SharedPreferences sharedPref = getPreferences(Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPref.edit();
+
+        if(recentZipcodes.size() > 0)
+            editor.putString("zipcodes", recentZipcodes.toString());
+
+        editor.putBoolean("imperial", imperialPreferred);
+
+        // Commit the edits!
+        editor.commit();
     }
 
     @Override
