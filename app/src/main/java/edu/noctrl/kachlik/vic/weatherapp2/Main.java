@@ -1,12 +1,16 @@
 package edu.noctrl.kachlik.vic.weatherapp2;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.EditText;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 
@@ -167,11 +171,81 @@ public class Main extends ActionBarActivity {
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
+        if(id == R.id.action_7day)
+        {
+
+        }
+        else if(id == R.id.action_about)
+        {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this)
+                    .setTitle("about").setMessage("Weather information from forecast.weather.gov")
+                    .setNeutralButton("okay", new DialogInterface.OnClickListener()
+                    {
+                        public void onClick(DialogInterface dialog, int id) {
+                            // FIRE ZE MISSILES!
+                        }
+                    });
+
+            builder.show();
+        }
+        else if(id == R.id.action_units)
+        {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setTitle("Unit")
+                    .setItems(R.array.units, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            Toast.makeText(getApplicationContext(), ""+which,
+                                    Toast.LENGTH_LONG).show();
+                        }
+                    });
+            builder.show();
+        }
+        else if(id == R.id.action_currentWeather)
+        {
+
+        }
+        else if(id == R.id.action_recentZip)
+        {
+
+        }
+        else
+        {
+            AlertDialog.Builder alert = new AlertDialog.Builder(this);
+
+            alert.setTitle("Title");
+            alert.setMessage("Message");
+
+// Set an EditText view to get user input
+            final EditText input = new EditText(this);
+            alert.setView(input);
+
+            alert.setPositiveButton("Ok", new DialogInterface.OnClickListener()
+            {
+                public void onClick(DialogInterface dialog, int whichButton)
+                {
+                    String value = input.getText().toString();
+                    Toast.makeText(getApplicationContext(), value,
+                            Toast.LENGTH_LONG).show();
+                }
+            });
+
+            alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int whichButton) {
+                    // Canceled.
+                }
+            });
+
+            alert.show();
         }
 
+        //String url = ((EditText)findViewById(R.id.URLText)).getText().toString();
+        //Intent i = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+
+        // startActivity(i);
+
+
+
         return super.onOptionsItemSelected(item);
+
     }
 }
